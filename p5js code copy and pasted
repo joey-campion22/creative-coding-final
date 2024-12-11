@@ -1,0 +1,188 @@
+//declare variables
+
+//sprite variables
+let engineer;
+let test;
+let idle;
+let walkRight;
+let walkLeft;
+let interact;
+
+//machine variables
+let machine1;
+let machine2;
+let button1;
+let button2;
+
+//water variables
+let waterIdle1;
+let waterIdle2;
+
+let wy1 = 300; // y coordinates for water idle 1 & 2
+let wy2 = 300;
+
+let drain = false; // to tell if water as drained or not
+let drain2 = false;
+
+//coordinate variables
+ let x = 50;
+ let y = 375;
+
+
+
+//arduino variables
+let serial;
+let latestData = "waiting for data";
+
+//load images
+function preload(){
+  //character
+  engineer = loadImage("engineeridle.png");
+  idle = loadImage("engineeridle.png");
+  walkLeft = loadImage("engineerleft.png");
+  walkRight = loadImage("engineerright.png");
+  test = loadImage("test.png");
+  interact = loadImage("engineerinteract.png");
+  
+  //water
+  waterIdle1 = loadImage("wateridle.gif");
+  waterIdle2 = loadImage("wateridle.gif");
+  waterDrain1 = loadImage("waterdrain.gif");
+  waterDrain2 = loadImage("waterdrain.gif");
+  empty = loadImage("empty.png");
+  
+}
+function setup() {
+  createCanvas(600, 400);
+  imageMode(CENTER);
+  createCanvas(windowWidth, windowHeight);
+  
+  //p5 set up
+ serial = new p5.SerialPort();
+
+ serial.list();
+ serial.open('/dev/tty.usbmodem1301');
+
+ serial.on('connected', serverConnected);
+
+ serial.on('list', gotList);
+
+ serial.on('data', gotData);
+
+ serial.on('error', gotError);
+
+ serial.on('open', gotOpen);
+
+ serial.on('close', gotClose);
+
+}
+
+
+/*-------------------------------------------------------------------*/
+
+//p5 control functions
+function serverConnected() {
+ print("Connected to Server");
+}
+
+function gotList(thelist) {
+ print("List of Serial Ports:");
+
+ for (let i = 0; i < thelist.length; i++) {
+  print(i + " " + thelist[i]);
+ }
+}
+
+function gotOpen() {
+ print("Serial Port is Open");
+}
+
+function gotClose(){
+ print("Serial Port is Closed");
+ latestData = "Serial Port is Closed";
+}
+
+function gotError(theerror) {
+ print(theerror);
+}
+
+function gotData() {
+  let currentString = serial.readLine();
+  trim(currentString);
+  if (!currentString) return;
+  console.log(currentString);
+  latestData = currentString;
+}
+//p5 control functions end
+
+/*-------------------------------------------------------------------*/
+
+
+function draw() {
+  background(220);
+
+  //floor
+  noStroke();
+  fill(100);
+  rect(0,315,600,400);
+  
+  //machines
+  fill(50);
+  machine1 = rect(170,200,150,175);
+  machine2 = rect(430,200,150,175);
+  
+  fill(255,0,0);
+  button1 = circle(181,325,10);
+  button2 = circle(441,325,10);
+  
+  //base set up (no buttons pressed yet,  first thing seen when first loaded)
+  image(waterIdle1, 245, wy1, 300, 250); //water for machine 1
+  image(waterIdle2, 503, wy2, 300,250); //water for machine 2
+  
+  fill(100);
+  rect(170,358,150,500);
+  rect(430,358,150,500);
+  
+  image(engineer, x, y, 175, 175);
+  
+  
+  
+  //right button pressed: character moves to the right and changes to walk sprite
+  if(latestData == 1 && x < windowWidth){
+     x+=5;
+     engineer = walkRight;
+     } 
+  
+  //left button pressed: character moves to the left and changes to walk sprite
+  else if(latestData == 2 && x > 0){
+    x-=5;
+    engineer = walkLeft;
+  } else {
+    engineer = idle;
+  }
+  
+  
+  //interact action for machine 1
+  if(latestData == 3 && x >= 170 && x <= 310){
+    engineer = interact;
+    if(engineer == interact){
+       fill(0,255,0);
+        button1 = circle(181,325,10);
+        drain = true;
+       } 
+  } else if(latestData != 3 && drain == true){
+         wy1+=1;
+       }
+  
+  //interact action for machine 2
+    if(latestData == 3 && x >= 430 && x <= 600){
+    engineer = interact;
+      if(engineer == interact){
+       fill(0,255,0);
+        button2 = circle(441,325,10);
+        drain2 = true;
+       } 
+  } else if(latestData != 3 && drain2 == true){
+         wy2+=1;
+       }
+}
