@@ -1,0 +1,48 @@
+#include <Adafruit_CircuitPlayground.h>
+
+bool leftButtonPressed;
+bool rightButtonPressed;
+bool slideSwitch;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  CircuitPlayground.begin();
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //variables
+  leftButtonPressed = CircuitPlayground.leftButton();
+  rightButtonPressed = CircuitPlayground.rightButton();
+  slideSwitch = CircuitPlayground.slideSwitch();
+
+  if (rightButtonPressed){
+    Serial.println(1);
+    CircuitPlayground.setPixelColor(5, 255,20,147);
+    CircuitPlayground.setPixelColor(6, 255,20,147);
+    CircuitPlayground.setPixelColor(7, 255,20,147);
+    CircuitPlayground.setPixelColor(8, 255,20,147);
+    CircuitPlayground.setPixelColor(9, 255,20,147);
+  } else {
+    Serial.print(0);
+    CircuitPlayground.clearPixels();
+  }
+
+  if(leftButtonPressed){
+    Serial.print(2);
+    CircuitPlayground.setPixelColor(0, 0,255,0);
+    CircuitPlayground.setPixelColor(1, 0,255,0);
+    CircuitPlayground.setPixelColor(2, 0,255,0);
+    CircuitPlayground.setPixelColor(3, 0,255,0);
+    CircuitPlayground.setPixelColor(4, 0,255,0);
+  } else {
+    Serial.print(0);
+  }
+  if(slideSwitch){
+    Serial.print(3);
+  }
+  Serial.println();
+
+}
